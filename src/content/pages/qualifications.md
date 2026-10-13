@@ -8,9 +8,9 @@ title: "Qualifications"
 
 <table><thead><tr><th>Starts</th><th>1st</th><th>2nd</th><th>3rd</th><th>Purses</th><th>UDRS</th></tr></thead><tbody><tr><td>34,164</td><td>5,478</td><td>4,829</td><td>4,497</td><td>$37,688,704</td><td>.292</td></tr></tbody></table>
 
-<h4 class="wp-block-heading">Lifetime Training Statistics</h4>
+<h4 class="wp-block-heading">Lifetime Training Statistics (Through 12/31/2025)</h4>
 
-<table><thead><tr><th>Starts</th><th>1st</th><th>2nd</th><th>3rd</th><th>Purses</th><th>UDRS</th></tr></thead><tbody><tr><td>7,582</td><td>1,213</td><td>1,186</td><td>1,075</td><td>$14,258,759</td><td>.294</td></tr></tbody></table>
+<table><thead><tr><th>Starts</th><th>1st</th><th>2nd</th><th>3rd</th><th>Purses</th><th>UDRS</th></tr></thead><tbody><tr><td>7,880</td><td>1,270</td><td>1,230</td><td>1,112</td><td>$14,983,989</td><td>.295</td></tr></tbody></table>
 
 <h4 class="wp-block-heading">Lifetime Training Results by Year</h4>
 
