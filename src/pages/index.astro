@@ -4,6 +4,7 @@ import Base from '../layouts/Base.astro';
 import Social from '../components/Social.astro';
 import { SITE, CATEGORIES, SOCIAL, DEFAULT_IMAGE } from '../config';
 import { thumb } from '../lib/thumb';
+import { youtubeId } from '../lib/youtube';
 
 const home = await getEntry('pages', 'home');
 const { Content } = await render(home!);
@@ -40,7 +41,9 @@ const schema = [
       <ul class="latest">
         {latest.map((p) => (
           <li>
-            <img src={thumb(p.data.image ?? DEFAULT_IMAGE)} alt="" loading="lazy" width="72" height="72" />
+            {(() => { const v = youtubeId(p.data.youtube); return v
+              ? <img class="yt-thumb" src={`https://i.ytimg.com/vi/${v}/mqdefault.jpg`} alt="" loading="lazy" width="112" height="63" />
+              : <img src={thumb(p.data.image ?? DEFAULT_IMAGE)} alt="" loading="lazy" width="112" height="63" />; })()}
             <div><a href={`/${p.id}/`}>{p.data.title}</a><time datetime={p.data.date.toISOString()}>{fmt.format(p.data.date)}</time></div>
           </li>
         ))}

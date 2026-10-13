@@ -144,3 +144,7 @@ a:hover { color: var(--accent); }
 .latest img { background: #fff; border: 1px solid var(--line); object-fit: contain; }
 .post-list img { object-fit: contain; background: #fff; }
 .stat-note { font-size: .9rem; color: var(--muted); }
+
+.latest li { grid-template-columns: 112px 1fr; }
+.latest img { width: 112px; height: 63px; object-fit: cover; border-radius: 6px; }
+.latest img:not(.yt-thumb) { object-fit: contain; }
