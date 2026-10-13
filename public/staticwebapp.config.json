@@ -1,0 +1,55 @@
+{
+  "navigationFallback": {
+    "rewrite": "/404.html",
+    "exclude": [
+      "/_astro/*",
+      "/pagefind/*",
+      "/uploads/*",
+      "*.{css,js,png,jpg,jpeg,gif,webp,svg,ico,woff2}"
+    ]
+  },
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/404.html"
+    }
+  },
+  "routes": [
+    {
+      "route": "/our-winners/page/*",
+      "redirect": "/our-winners/",
+      "statusCode": 301
+    },
+    {
+      "route": "/category/wins/page/*",
+      "redirect": "/category/wins/",
+      "statusCode": 301
+    },
+    {
+      "route": "/category/news/page/*",
+      "redirect": "/category/news/",
+      "statusCode": 301
+    },
+    {
+      "route": "/category/training-updates/page/*",
+      "redirect": "/category/training-updates/",
+      "statusCode": 301
+    },
+    {
+      "route": "/welcome/",
+      "redirect": "/",
+      "statusCode": 301
+    },
+    {
+      "route": "/uploads/*",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "route": "/_astro/*",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    }
+  ]
+}

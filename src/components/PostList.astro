@@ -1,0 +1,24 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { thumb } from '../lib/thumb';
+import { DEFAULT_IMAGE } from '../config';
+interface Props {
+  posts: CollectionEntry<'posts'>[];
+}
+const { posts } = Astro.props;
+const fmt = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' });
+---
+
+<ul class="post-list">
+  {
+    posts.map((p) => (
+      <li>
+        <img src={thumb(p.data.image ?? DEFAULT_IMAGE)} alt={p.data.imageAlt ?? ''} loading="lazy" width="96" height="72" />
+        <div>
+          <a href={`/${p.id}/`}>{p.data.title}</a>
+          <time datetime={p.data.date.toISOString()}>{fmt.format(p.data.date)}</time>
+        </div>
+      </li>
+    ))
+  }
+</ul>

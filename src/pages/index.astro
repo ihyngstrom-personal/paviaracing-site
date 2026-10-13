@@ -1,0 +1,55 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Social from '../components/Social.astro';
+import { SITE, CATEGORIES, SOCIAL, DEFAULT_IMAGE } from '../config';
+import { thumb } from '../lib/thumb';
+
+const home = await getEntry('pages', 'home');
+const { Content } = await render(home!);
+const all = await getCollection('posts', (p) => !p.data.draft);
+const latest = all.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).slice(0, 6);
+const counts = Object.fromEntries(
+  Object.keys(CATEGORIES).map((c) => [c, all.filter((p) => p.data.categories.includes(c)).length]),
+);
+const fmt = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' });
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SportsOrganization',
+    name: SITE.name,
+    url: SITE.url,
+    logo: `${SITE.url}/logo.png`,
+    description: SITE.description,
+    email: SITE.email,
+    sport: 'Harness racing',
+    sameAs: SOCIAL.map((s) => s.href),
+  },
+  { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE.name, url: SITE.url },
+];
+---
+
+<Base title={SITE.name} description={home!.data.description ?? SITE.description} image="/uploads/2023/12/Pavia-FB-Cover.webp" schema={schema}>
+  <div class="home-grid">
+    <div class="prose" data-pagefind-body>
+      <Content />
+      <Social class="contact-social" size={32} />
+    </div>
+    <aside class="sidebar" aria-labelledby="lp">
+      <h2 id="lp">Recent Posts</h2>
+      <ul class="latest">
+        {latest.map((p) => (
+          <li>
+            <img src={thumb(p.data.image ?? DEFAULT_IMAGE)} alt="" loading="lazy" width="72" height="72" />
+            <div><a href={`/${p.id}/`}>{p.data.title}</a><time datetime={p.data.date.toISOString()}>{fmt.format(p.data.date)}</time></div>
+          </li>
+        ))}
+      </ul>
+      <p><a href="/our-winners/">View all wins</a></p>
+      <h2>Categories</h2>
+      <ul class="cats">
+        {Object.entries(CATEGORIES).map(([slug, label]) => <li><a href={`/category/${slug}/`}>{label} ({counts[slug]})</a></li>)}
+      </ul>
+    </aside>
+  </div>
+</Base>

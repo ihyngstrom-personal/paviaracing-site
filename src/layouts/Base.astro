@@ -1,0 +1,103 @@
+---
+import '@fontsource-variable/manrope';
+import '../styles/global.css';
+import Social from '../components/Social.astro';
+import { SITE, NAV, CATEGORIES } from '../config';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article';
+  published?: Date;
+  noindex?: boolean;
+  schema?: Record<string, unknown>[];
+}
+const { title, description = SITE.description, image, imageAlt, type = 'website', published, noindex = false, schema = [] } = Astro.props;
+const absolute = (u: string) => new URL(u, Astro.site).href;
+const ogImage = absolute(image || '/logo.png');
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const fullTitle = title === SITE.name ? `${SITE.name} | Standardbred Harness Racing` : `${title} | ${SITE.name}`;
+const path = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content={type} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content={ogImage} />
+    {imageAlt && <meta property="og:image:alt" content={imageAlt} />}
+    {type === 'article' && published && <meta property="article:published_time" content={published.toISOString()} />}
+    <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-video-preview:-1'} />
+    <link rel="alternate" type="application/rss+xml" title={`${SITE.name} posts`} href="/rss.xml" />
+    {schema.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="/"><img src="/logo.png" alt={SITE.name} width="175" height="50" /></a>
+        <nav aria-label="Main">
+          {
+            NAV.map((n) => (
+              <a href={n.href} aria-current={path === n.href ? 'page' : undefined}>
+                {n.label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </header>
+    <slot name="hero" />
+    <main id="main">
+      <div class="wrap"><slot /></div>
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <a class="brand" href="/"><img src="/logo.png" alt={SITE.name} width="175" height="50" loading="lazy" /></a>
+        <ul class="foot-cats" aria-label="Footer links">
+          <li><a href="/">Home</a></li>
+          {Object.entries(CATEGORIES).map(([slug, label]) => <li><a href={`/category/${slug}/`}>{label}</a></li>)}
+        </ul>
+        <Social />
+        <div class="copy">© {new Date().getFullYear()} {SITE.name}. All rights reserved.</div>
+      </div>
+    </footer>
+<script>
+  // Click-to-load: the YouTube player is only fetched when someone presses play.
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('.yt button');
+    if (!btn) return;
+    const box = btn.parentElement as HTMLElement;
+    const id = box.dataset.yt;
+    const f = document.createElement('iframe');
+    f.src = box.dataset.list
+      ? `https://www.youtube-nocookie.com/embed/videoseries?list=${box.dataset.list}&autoplay=1&rel=0`
+      : `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+    f.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+    f.allowFullscreen = true;
+    f.title = btn.getAttribute('aria-label') ?? 'Video';
+    box.replaceChildren(f);
+  });
+</script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import YearList from '../../components/YearList.astro';
+import { CATEGORIES, CATEGORY_DESCRIPTIONS } from '../../config';
+
+export function getStaticPaths() {
+  return Object.entries(CATEGORIES).map(([slug, label]) => ({ params: { category: slug }, props: { label } }));
+}
+const { category } = Astro.params;
+const { label } = Astro.props;
+const posts = (await getCollection('posts', (p) => !p.data.draft && p.data.categories.includes(category!))).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<Base title={label} description={CATEGORY_DESCRIPTIONS[category!]} noindex={posts.length === 0}>
+  <h1>{label}</h1>
+  {posts.length ? <YearList posts={posts} /> : <p>No posts in this category yet.</p>}
+</Base>

@@ -1,0 +1,18 @@
+---
+import { youtubeId } from '../lib/youtube';
+interface Props {
+  url: string;
+  title?: string;
+}
+const { url, title = 'Race video' } = Astro.props;
+const id = youtubeId(url);
+---
+
+{
+  id && (
+    <div class="yt" style={`background-image:url(https://i.ytimg.com/vi/${id}/hqdefault.jpg)`} data-yt={id}>
+      <button type="button" aria-label={`Play video: ${title}`} />
+    </div>
+  )
+}
+

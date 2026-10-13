@@ -1,0 +1,97 @@
+---
+// One route for both posts and pages, matching the old WordPress root-level URLs (/some-post-slug/).
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import YouTube from '../components/YouTube.astro';
+import { CATEGORIES, SITE, SOCIAL } from '../config';
+import { autoDescription } from '../lib/seo';
+import { youtubeId } from '../lib/youtube';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', (p) => !p.data.draft);
+  const pages = (await getCollection('pages')).filter((p) => p.id !== 'home');
+  return [
+    ...posts.map((entry) => ({ params: { slug: entry.id }, props: { entry, kind: 'post' as const } })),
+    ...pages.map((entry) => ({ params: { slug: entry.id }, props: { entry, kind: 'page' as const } })),
+  ];
+}
+
+const { entry, kind } = Astro.props;
+const { Content } = await render(entry);
+const fmt = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' });
+const data = entry.data as any;
+// Show the featured image only when it isn't already in the post body and isn't just a YouTube thumbnail.
+const showImage = data.image && !data.image.includes('ytimg.com') && !(entry.body ?? '').includes(data.image);
+const abs = (u: string) => new URL(u, SITE.url).href;
+const prettyDate = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' }).format(data.date);
+const description =
+  data.description ||
+  autoDescription(entry.body ?? '') ||
+  (kind === 'post' ? `${data.title} Race details from the Pavia Racing Stable, ${prettyDate}.` : SITE.description);
+// Several race posts share a title (e.g. "Warrawee Veloce Wins at The Meadows!"), so add the date to the <title> tag of duplicates.
+const sameTitle = (await getCollection('posts', (p) => !p.data.draft)).filter((p) => p.data.title === data.title).length;
+const pageTitle = kind === 'post' && sameTitle > 1 ? `${data.title} (${prettyDate})` : data.title;
+const url = `${SITE.url}/${entry.id}/`;
+const vid = youtubeId(data.youtube);
+const org = { '@type': 'Organization', name: SITE.name, url: SITE.url, logo: { '@type': 'ImageObject', url: abs('/logo.png') } };
+const schema: Record<string, unknown>[] = [];
+if (kind === 'post') {
+  schema.push({
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: data.title,
+    description,
+    datePublished: data.date.toISOString(),
+    dateModified: data.date.toISOString(),
+    mainEntityOfPage: url,
+    ...(data.image ? { image: [abs(data.image)] } : {}),
+    author: { '@type': 'Person', name: 'Joe Pavia Jr.', url: SITE.url },
+    publisher: org,
+  });
+  if (vid) {
+    schema.push({
+      '@context': 'https://schema.org',
+      '@type': 'VideoObject',
+      name: data.title,
+      description,
+      thumbnailUrl: [`https://i.ytimg.com/vi/${vid}/hqdefault.jpg`],
+      uploadDate: data.date.toISOString(),
+      embedUrl: `https://www.youtube.com/embed/${vid}`,
+      publisher: org,
+    });
+  }
+}
+schema.push({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.url}/` },
+    { '@type': 'ListItem', position: 2, name: data.title, item: url },
+  ],
+});
+---
+
+<Base
+  title={pageTitle}
+  image={data.image}
+  imageAlt={data.imageAlt}
+  description={description}
+  type={kind === 'post' ? 'article' : 'website'}
+  published={kind === 'post' ? data.date : undefined}
+  schema={schema}
+>
+  <article class="prose" data-pagefind-body>
+    <h1>{data.title}</h1>
+    {kind === 'post' && <time class="meta" datetime={data.date.toISOString()}>{fmt.format(data.date)}</time>}
+    {data.youtube && <YouTube url={data.youtube} title={data.title} />}
+    {showImage && <img src={data.image} alt={data.imageAlt ?? data.title} />}
+    <Content />
+    {
+      kind === 'post' && data.categories.length > 0 && (
+        <ul class="cats">
+          {data.categories.map((c: string) => <li><a href={`/category/${c}/`}>{CATEGORIES[c] ?? c}</a></li>)}
+        </ul>
+      )
+    }
+  </article>
+</Base>

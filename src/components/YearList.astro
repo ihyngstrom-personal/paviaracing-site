@@ -1,0 +1,32 @@
+---
+// Compact archive: posts grouped by year, newest first. Keeps 500+ post lists light.
+import type { CollectionEntry } from 'astro:content';
+interface Props { posts: CollectionEntry<'posts'>[] }
+const { posts } = Astro.props;
+const sorted = [...posts].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const byYear = new Map<number, CollectionEntry<'posts'>[]>();
+for (const p of sorted) {
+  const y = p.data.date.getUTCFullYear();
+  byYear.set(y, [...(byYear.get(y) ?? []), p]);
+}
+const fmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+---
+
+<nav class="year-jump" aria-label="Jump to year">
+  {[...byYear.keys()].map((y) => <a href={`#y${y}`}>{y}</a>)}
+</nav>
+{
+  [...byYear.entries()].map(([y, list]) => (
+    <section class="year-block">
+      <h2 id={`y${y}`}>{y} <small>({list.length})</small></h2>
+      <ul class="year-list">
+        {list.map((p) => (
+          <li>
+            <time datetime={p.data.date.toISOString()}>{fmt.format(p.data.date)}</time>
+            <a href={`/${p.id}/`}>{p.data.title}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))
+}

@@ -1,0 +1,20 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import YearList from '../components/YearList.astro';
+import { CATEGORIES } from '../config';
+
+const posts = await getCollection('posts', (p) => !p.data.draft && p.data.categories.includes('wins'));
+---
+
+<Base
+  title="Our Winners"
+  description="Every win for the Pavia Racing Stable, newest first: Standardbred harness racing results and videos going back to 2014."
+>
+  <h1>Our Winners</h1>
+  <p>
+    {posts.length} wins and counting. Open any race for the video and details.
+    Also see <a href="/category/news/">{CATEGORIES.news}</a> and <a href="/category/training-updates/">{CATEGORIES['training-updates']}</a>.
+  </p>
+  <YearList posts={posts} />
+</Base>
